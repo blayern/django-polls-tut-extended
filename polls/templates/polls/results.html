@@ -1,0 +1,51 @@
+{% load bootstrap3 %}
+{% load static %}
+{% bootstrap_css %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="{% static 'polls/jquery.canvasjs.min.js' %}"></script>
+
+{% bootstrap_javascript %}
+
+<h1>{{ question.question_text }}</h1>
+{% if not question.choice_set.all %}
+    <p><strong>No Answers</strong></p>
+{% else %}
+	<ul class="list-group">
+	{% for choice in question.choice_set.all|dictsortreversed:"votes" %}
+	    <li class="list-group-item">{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
+	{% endfor %}
+	</ul>
+	<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+	<a href="{% url 'polls:detail' question.id %}" class="button btn btn-primary">Vote again?</a>
+{% endif %}
+
+<script type="text/javascript">
+window.onload = function() {
+	var options = {
+		title: {
+			text: "{{ question.question_text|safe }}"
+		},
+	            animationEnabled: true,
+		data: [
+		{
+			type: "pie", //change it to line, area, bar, pie, etc
+			dataPoints: []
+		}
+		]
+	};
+
+	var choices = "{{ question.get_choice_set_all_json|safe|escapejs }}"
+	choices = JSON.parse( choices );
+	for(var k in choices) {
+		options.data[0].dataPoints.push(
+			{
+				y:choices[k].fields.votes,
+				legendText:choices[k].fields.choice_text,
+				label:choices[k].fields.choice_text
+			})
+	}
+$("#chartContainer").CanvasJSChart(options);
+}
+</script>

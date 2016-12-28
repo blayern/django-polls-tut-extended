@@ -1,0 +1,9 @@
+body {
+	padding-left: 150px;
+	padding-right: 150px;
+}
+
+li a {
+    color: green;
+    font-size: 20px;
+}
